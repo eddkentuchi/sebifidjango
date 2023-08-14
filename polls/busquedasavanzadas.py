@@ -230,7 +230,11 @@ def DetallesCredit(request):
         first_list.append({
                 'namecredit':   tipo_credito_id.nombre_credito,
                 'objective':    tipo_credito_id.objetivo,
-                'urlDirection': tipo_credito_id.tipo_credito_url
+                'urlDirection': tipo_credito_id.tipo_credito_url,
+                'pay':          tipo_credito_id.nombre_credito,
+                'register':     tipo_credito_id.nombre_credito,
+                'period':       tipo_credito_id.nombre_credito
+
             })
         try:
             documentos_requeridos = DocumentoRequerido.objects.filter(tipo_credito=tipo_credito_id,tipo_persona=tipo_persona_id)
@@ -243,16 +247,16 @@ def DetallesCredit(request):
         for documento in documentos_requeridos:
             second_list.append({
                 'docrequired':      documento.documento_requerido,
-                'docrequiredhint':  documento.documento_requerido_hint,
-                'docrurlformat':    documento.documento_requerido_url_formato,
-                'docurlhelp':       documento.documento_requerido_url_ayuda
+                'hint':  documento.documento_requerido_hint,
+                'pdf':    documento.documento_requerido_url_formato,
+                'web':       documento.documento_requerido_url_ayuda
             })
         third_list = []
         for procedimiento in procedimientos:
             third_list.append({
                 'proceduralorder':  procedimiento.paso_orden,
                 'procedural':       procedimiento.procedimiento_paso,                
-                'proceduralurl':    procedimiento.paso_url,
+                'web':    procedimiento.paso_url,
                 
             })
         logger.debug(second_list)
