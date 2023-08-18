@@ -18,6 +18,8 @@ import hashlib
 from django.db.models import Q
 #biblioteca para generar el random
 import random
+#biblioteca de tiempo
+import time
 
 logger = logging.getLogger(__name__)
 #genera hash
@@ -178,6 +180,7 @@ def DatosUsuario(request):
         body = json.loads(request.body.decode('utf-8'))
         logger.info('Este es el random')
         logger.debug(body)
+        start_time = time.time() 
         try:
             curp      =body['curp'].upper()
         except (TypeError, ValueError):
@@ -258,6 +261,9 @@ def DatosUsuario(request):
             'folio':            solicitante.folio,
             'casevalue':        statusvalue
         })
+        end_time = time.time()  
+        elapsed_time = end_time - start_time
+        logger.debug(elapsed_time)
         logger.debug(resp_list)
         return JsonResponse(list(resp_list), safe=False)
             

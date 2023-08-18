@@ -8,6 +8,8 @@ from .models import Sectores,TiposCredito,DocumentoRequerido
 from .models import NivelesCredito
 #Biblioteca para imprimir en terminal
 import logging
+#biblioteca de tiempo
+import time
 
 logger = logging.getLogger(__name__)
 #trae todas las etnias
@@ -38,21 +40,15 @@ class TipoPoblacions(View):
         respuestas = TipoPoblacion.objects.values('tipo_poblacion_id','tipo_poblacion')
         resp_list = [{'id': respuesta['tipo_poblacion_id'],'datavalue': respuesta['tipo_poblacion']} for respuesta in respuestas]
         return JsonResponse(list(resp_list), safe=False)
-#trae solo creditos de tipo negocio
-#class CreditosNegocios(View):
-#    def get(self, request):
-#        tipo_credito = 'Financiamiento Microcréditos'
-#        respuestas = TiposCredito.objects.filter(tipo_credito=tipo_credito).values('tipo_credito_id','codigo','nombre_credito','descripcion_tipo_credito','objetivo','procedimiento_id')
-#        resp_list = [{'id': respuesta['tipo_credito_id'],'code': respuesta['codigo'],'datavalue': respuesta['nombre_credito'],'descriptioncredit': respuesta['descripcion_tipo_credito'],'objective': respuesta['objetivo'],'procedure': respuesta['procedimiento_id']} for respuesta in respuestas]
-#        return JsonResponse(list(resp_list), safe=False)
-#trae toda la información de creditos de tipo negocio
-class CreditosNegocios(View):
+#trae toda la información de creditos de tipo micricreditos
+class CreditosMicrocreditos(View):
     def get(self, request):
         tipo_credito = 'Financiamiento Microcréditos'
         respuestas = TiposCredito.objects.filter(tipo_credito=tipo_credito).values('tipo_credito_id','codigo','nombre_credito','descripcion_tipo_credito','objetivo','procedimiento_id')
         resultado = []
         for respuesta in respuestas:
                 idcredit = respuesta['tipo_credito_id']
+                codigo = respuesta['codigo']
                 datavalue = respuesta['nombre_credito']
                 # Realiza consultas para obtener los niveles más alto y más bajo
                 niveles = NivelesCredito.objects.filter(tipo_credito_id=idcredit)
@@ -64,22 +60,48 @@ class CreditosNegocios(View):
                 if nivel_alto and nivel_bajo:
                     resultado.append({
                         'id': idcredit,
+                        'codigo' : codigo,
                         'datavalue': datavalue,
                         'level': float(nivel_alto.nivel),
                         'monto_max': float(nivel_alto.monto_maximo),
                         'monto_min': float(nivel_bajo.monto_minimo),
                         'tasa': float(nivel_bajo.tasa_ordinaria),
                     })
-        logger.debug(resultado)
-        return JsonResponse(list(resultado), safe=False)
-#trae solo creditos de tipo empresa
-#class CreditosEmpresas(View):
-#    def get(self, request):
-#        tipo_credito = 'Financiamiento Empresa'
-#        respuestas = TiposCredito.objects.filter(tipo_credito=tipo_credito).values('tipo_credito_id','codigo','nombre_credito','descripcion_tipo_credito','objetivo','procedimiento_id')
-#        resp_list = [{'id': respuesta['tipo_credito_id'],'code': respuesta['codigo'],'datavalue': respuesta['nombre_credito'],'descriptioncredit': respuesta['descripcion_tipo_credito'],'objective': respuesta['objetivo'],'procedure': respuesta['procedimiento_id']} for respuesta in respuestas]
-#        logger.debug(resp_list)
-#        return JsonResponse(list(resp_list), safe=False)
+        #logger.debug(resultado)
+        
+        resultado_ordenado = sorted(resultado, key=lambda x: x['codigo'])
+        logger.debug(resultado_ordenado)
+        return JsonResponse(list(resultado_ordenado), safe=False)
+#trae toda la información de creditos de tipo negocio
+class CreditosNegocios(View):
+    def get(self, request):
+        tipo_credito = 'Financiamiento Negocio'
+        respuestas = TiposCredito.objects.filter(tipo_credito=tipo_credito).values('tipo_credito_id','codigo','nombre_credito','descripcion_tipo_credito','objetivo','procedimiento_id')
+        resultado = []
+        for respuesta in respuestas:
+                idcredit = respuesta['tipo_credito_id']
+                codigo = respuesta['codigo']
+                datavalue = respuesta['nombre_credito']
+                # Realiza consultas para obtener los niveles más alto y más bajo
+                niveles = NivelesCredito.objects.filter(tipo_credito_id=idcredit)
+
+                nivel_alto = niveles.order_by('-nivel').first()
+                nivel_bajo = niveles.order_by('nivel').first()
+                
+                # Si existen niveles, agrega la información al resultado
+                if nivel_alto and nivel_bajo:
+                    resultado.append({
+                        'id': idcredit,
+                        'codigo': codigo,
+                        'datavalue': datavalue,
+                        'level': float(nivel_alto.nivel),
+                        'monto_max': float(nivel_alto.monto_maximo),
+                        'monto_min': float(nivel_bajo.monto_minimo),
+                        'tasa': float(nivel_bajo.tasa_ordinaria),
+                    })
+        resultado_ordenado = sorted(resultado, key=lambda x: x['codigo'])
+        logger.debug(resultado_ordenado)
+        return JsonResponse(list(resultado_ordenado), safe=False)
 #trae toda la información de creditos de tipo empresa
 class CreditosEmpresas(View):
     def get(self, request):
@@ -88,6 +110,7 @@ class CreditosEmpresas(View):
         resultado = []
         for respuesta in respuestas:
                 idcredit = respuesta['tipo_credito_id']
+                codigo = respuesta['codigo']
                 datavalue = respuesta['nombre_credito']
                 # Realiza consultas para obtener los niveles más alto y más bajo
                 niveles = NivelesCredito.objects.filter(tipo_credito_id=idcredit)
@@ -98,22 +121,17 @@ class CreditosEmpresas(View):
                 if nivel_alto and nivel_bajo:
                     resultado.append({
                         'id': idcredit,
+                        'codigo' : codigo,
                         'datavalue': datavalue,
                         'level': float(nivel_alto.nivel),
                         'monto_max': float(nivel_alto.monto_maximo),
                         'monto_min': float(nivel_bajo.monto_minimo),
                         'tasa': float(nivel_bajo.tasa_ordinaria),
                     })
-        return JsonResponse(list(resultado), safe=False)
-#trae los documentos generales
-class DocsGenerales(View):
-    def get(self, request):
-        tipo_credito = -1
-        tipo_persona = -1
-        respuestas = DocumentoRequerido.objects.filter(tipo_credito=tipo_credito,tipo_persona=tipo_persona).values('documento_requerido_id','documento_requerido')
-        resp_list = [{'id': respuesta['documento_requerido_id'],'datavalue': respuesta['documento_requerido']} for respuesta in respuestas]
-        return JsonResponse(list(resp_list), safe=False)
-#trae los documentos generales
+        resultado_ordenado = sorted(resultado, key=lambda x: x['codigo'])
+        logger.debug(resultado_ordenado)
+        return JsonResponse(list(resultado_ordenado), safe=False)
+#trae los giros de negocio segun el factor
 class SectoresGiros(View):
     def get(self, request):
         respuestas = Sectores.objects.values('sector_id','sector')

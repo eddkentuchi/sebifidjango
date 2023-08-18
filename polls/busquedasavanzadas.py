@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from .models import TipoGrupo,Solicitantes,Grupo,Negocio,Expediente,Creditos,DocumentoRequerido
 from .models import Colonias,Municipios,Estados,Sectores,Giros
 from .models import RelExpedienteCredito,RelExpedienteCurp,RelDireccionCurp
-from .models import TiposCredito,TipoPersona,DocumentoRequerido,Procedimientos
+from .models import TiposCredito,TipoPersona,DocumentoRequerido,Procedimientos,NivelesCredito,Periodicidad,Documentos
 #Biblioteca para imprimir en terminal
 import logging
 #Biblioteca para tratar el dato de la fecha
@@ -217,23 +217,33 @@ def DetallesCredit(request):
     logger.debug('Este es un mensaje de depuración para detalles de los creditos')
     if request.method == 'POST':
         body = json.loads(request.body.decode('utf-8'))
-        logger.debug(body)
+        #logger.debug(body)
         try:
             tipo_credito_id = TiposCredito.objects.get(tipo_credito_id=body['idtype'])
-            tipo_persona_id = TipoPersona.objects.get(tipo_persona_id=body['idperson'])   
-          
+            tipo_persona_id = TipoPersona.objects.get(tipo_persona_id=body['idperson'])
+            
         except (TypeError, ValueError):
             logger.info('Parámetro faltante en el cuerpo de la solicitud')
             return JsonResponse({'error': 'Parámetro faltante en el cuerpo de la solicitud'}, status=400)
+        logger.info('Parámetro faltante')
         logger.debug(tipo_credito_id)
+        nivel_de_credito = NivelesCredito.objects.get(tipo_credito_id=body['idtype'],nivel = 1)
+        logger.info('Parámetro faltante')
+        logger.debug(nivel_de_credito.tipo_plazo)
+        periodicidad_obj = nivel_de_credito.tipo_plazo_id
+        periodicidad = Periodicidad.objects.get(tipo_plazo_id=periodicidad_obj)
+        logger.info('Parámetro faltante')
+        
+        period = f"de {nivel_de_credito.numero_plazos} {periodicidad.tipo_plazo}"
+        logger.debug(period)
         first_list = []
         first_list.append({
                 'namecredit':   tipo_credito_id.nombre_credito,
                 'objective':    tipo_credito_id.objetivo,
                 'urlDirection': tipo_credito_id.tipo_credito_url,
-                'pay':          tipo_credito_id.nombre_credito,
-                'register':     tipo_credito_id.nombre_credito,
-                'period':       tipo_credito_id.nombre_credito
+                'pay':          periodicidad.tipo_plazo,
+                'register':     'En linea',
+                'period':       period
 
             })
         try:
@@ -259,5 +269,42 @@ def DetallesCredit(request):
                 'web':    procedimiento.paso_url,
                 
             })
-        logger.debug(second_list)
+        #logger.debug(second_list)
         return JsonResponse({'first': first_list,'second': second_list,'third': third_list}, safe=False)        
+
+@csrf_exempt
+def DocsGenerales(request):
+    logger.debug('Este es un mensaje de depuración para detalles de los documentos generales')
+    if request.method == 'POST':
+        body = json.loads(request.body.decode('utf-8'))
+        #logger.debug(body)
+        try:
+            solidario = Solicitantes.objects.get(curp=body['curp'])
+        except (TypeError, ValueError):
+            logger.info('Parámetro faltante en el cuerpo de la solicitud')
+            return JsonResponse({'error': 'Parámetro faltante en el cuerpo de la solicitud'}, status=400)
+        tipo_credito = -1
+        tipo_persona = -1
+        respuestas = DocumentoRequerido.objects.filter(tipo_credito=tipo_credito,tipo_persona=tipo_persona).values('documento_requerido_id','documento_requerido')
+        resp_list = []
+        for respuesta in respuestas:
+            try:
+                documento = Documentos.objects.get(curp=body['curp'], documento_requerido=respuesta['documento_requerido_id'])
+                resp_list.append({
+                    'id': respuesta['documento_requerido_id'],
+                    'datavalue': respuesta['documento_requerido'],
+                    'documento_id': documento.documento_id,
+                    'ruta_documento': documento.ruta_documento
+                })
+            except Documentos.DoesNotExist:
+                resp_list.append({
+                    'id': respuesta['documento_requerido_id'],
+                    'datavalue': respuesta['documento_requerido'],
+                    'documento_id': None,
+                    'ruta_documento': None
+                })
+        
+        
+        #resp_list = [{'id': respuesta['documento_requerido_id'],'datavalue': respuesta['documento_requerido']} for respuesta in respuestas]
+        return JsonResponse(list(resp_list), safe=False)
+    

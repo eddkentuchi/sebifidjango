@@ -98,16 +98,20 @@ def Userdata(request):
 def Userdataddress(request):
     if request.method == 'POST':
         body = json.loads(request.body.decode('utf-8'))
-        if body['internalnumber']:
+        print(body)
+        if 'internalnumber' in body:            
             num_interior            =body['internalnumber']
         else:
             num_interior            =''
+        if 'phonenumber' in body:            
+            telefono_fijo            =body['phonenumber']
+        else:
+            telefono_fijo            =''
         try:            
             alias                   =body['alias']
             calle                   =body['street']
             num_exterior            =body['externalnumber']
             colonia                 =Colonias.objects.get(colonia_id=int(body['colony']))
-            telefono_fijo           =body['phonenumber']
             entre_calles            =body['streetsaround']
             referencia_domicilio    =body['references']
             editable                =0

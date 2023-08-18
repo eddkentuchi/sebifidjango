@@ -29,16 +29,17 @@ urlpatterns = [
     path('giros/',          busquedasavanzadas.BuscaGiros,      name='giros'),
     path('creditdocs/',     busquedasavanzadas.CreditDocsList,  name='creditdocs'),
     path('detallescredit/', busquedasavanzadas.DetallesCredit,  name='detallescredit'),
-        
+    path('docsgenerales/',  busquedasavanzadas.DocsGenerales,   name='docsgenerales'),    
     #paths get
-    path('etnias/',         exportlist.Etnias.as_view(),            name='etnias'),
-    path('edocivils/',      exportlist.EdoCivils.as_view(),         name='edocivils'),
-    path('sexos/',          exportlist.Sexos.as_view(),             name='sexos'),
-    path('tipopoblacions/', exportlist.TipoPoblacions.as_view(),    name='tipopoblacions'),
-    path('credinegocios/',  exportlist.CreditosNegocios.as_view(),  name='credinegocios'),
-    path('crediempresas/',  exportlist.CreditosEmpresas.as_view(),  name='crediempresas'),
-    path('docsgenerales/',  exportlist.DocsGenerales.as_view(),     name='docsgenerales'),
-    path('sectoresgiros/',  exportlist.SectoresGiros.as_view(),     name='sectoresgiros'),
+    path('etnias/',         exportlist.Etnias.as_view(),                name='etnias'),
+    path('edocivils/',      exportlist.EdoCivils.as_view(),             name='edocivils'),
+    path('sexos/',          exportlist.Sexos.as_view(),                 name='sexos'),
+    path('tipopoblacions/', exportlist.TipoPoblacions.as_view(),        name='tipopoblacions'),
+    path('credimicros/',    exportlist.CreditosMicrocreditos.as_view(), name='credimicro'),
+    path('credinegocios/',  exportlist.CreditosNegocios.as_view(),      name='credinegocios'),   
+    path('crediempresas/',  exportlist.CreditosEmpresas.as_view(),      name='crediempresas'),
+    
+    path('sectoresgiros/',  exportlist.SectoresGiros.as_view(),         name='sectoresgiros'),
     #paths de prueba
     path('get-csrf-token/', token.get_csrf_token,   name='token'),
     path("",                views.polls,            name="polls"),

@@ -106,7 +106,7 @@ class Bancos(models.Model):
         db_table = 'bancos'
 
 
-class Cartera(models.Model):
+class Carteraold(models.Model):
     expediente = models.CharField(max_length=50, blank=True, null=True)
     nombre = models.CharField(max_length=250, blank=True, null=True)
     primer_apellido = models.CharField(max_length=250, blank=True, null=True)
@@ -138,7 +138,7 @@ class Cartera(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'cartera'
+        db_table = 'carteraold'
 
 
 class CasosLegales(models.Model):
@@ -185,7 +185,7 @@ class Creditos(models.Model):
     folio = models.CharField(unique=True, max_length=255, blank=True, null=True, db_comment='Folio del crédito individual o grupal')
     tipo_credito_solicitado = models.ForeignKey('TiposCredito', models.DO_NOTHING, blank=True, null=True, db_comment='Llave foranea del tipo de crédito')
     nivel_credito = models.ForeignKey('NivelesCredito', models.DO_NOTHING, blank=True, null=True, db_comment='Llave foranea del nivel de crédito')
-    fecha_solicitud = models.DateField(blank=True, null=True, db_comment='Fecha de solicitud del crédito')
+    fecha_solicitud = models.DateField(blank=True, null=True, db_comment='Fecha en la que finaliza su solicitud del crédito')
     monto_asignado = models.DecimalField(max_digits=65535, decimal_places=65535, blank=True, null=True, db_comment='Monto autorizado del crédito')
     tipo_plazo = models.ForeignKey('Periodicidad', models.DO_NOTHING, blank=True, null=True, db_comment='Tipo de plazo mensual, quincenal')
     numero_plazos = models.IntegerField(blank=True, null=True, db_comment='Números de plazos')
@@ -203,8 +203,9 @@ class Creditos(models.Model):
     monto_pago = models.DecimalField(max_digits=65535, decimal_places=65535, blank=True, null=True, db_comment='Importe del pago de 1 a n-1')
     monto_pago_final = models.DecimalField(max_digits=65535, decimal_places=65535, blank=True, null=True, db_comment='importe del pago final para obtener un monto cerrado')
     monto_asignado_letra = models.CharField(max_length=255, blank=True, null=True, db_comment='Monto asisgando de crédito escrito en letra para formatos')
-    tipo_credito_asignado = models.ForeignKey('TiposCredito', models.DO_NOTHING, related_name='creditos_tipo_credito_asignado_set', blank=True, null=True)
-    tipo_persona = models.ForeignKey('TipoPersona', models.DO_NOTHING, blank=True, null=True)
+    tipo_credito_asignado = models.ForeignKey('TiposCredito', models.DO_NOTHING, related_name='creditos_tipo_credito_asignado_set', blank=True, null=True, db_comment='Es el crédito que FONDESO asisgnó a esta solicitud')
+    tipo_persona = models.ForeignKey('TipoPersona', models.DO_NOTHING, blank=True, null=True, db_comment='Es el tipo de persona que solicita el crédito')
+    fecha_registro = models.DateField(blank=True, null=True, db_comment='Fecha en la que inicia el proceso de crédito')
 
     class Meta:
         managed = False
@@ -379,6 +380,16 @@ class Extranjero(models.Model):
     class Meta:
         managed = False
         db_table = 'extranjero'
+
+
+class Folios(models.Model):
+    folio = models.OneToOneField('Solicitantes', models.DO_NOTHING, primary_key=True, db_comment='Identificador único y secuencial de los folios generados')
+    curp = models.CharField(max_length=18, db_comment='CURP al que fue asignado esta secuencia de folio')
+    fecha_registro = models.DateField(db_comment='Fecha en que se realizo la asignación del secuencial y el CURP')
+
+    class Meta:
+        managed = False
+        db_table = 'folios'
 
 
 class Giros(models.Model):
@@ -675,6 +686,8 @@ class Solicitantes(models.Model):
     nacionalidad = models.CharField(max_length=50, blank=True, null=True, db_comment='Nacionalidad')
     hash = models.CharField(max_length=128, blank=True, null=True, db_comment='Hash de la solicitud')
     folio = models.CharField(max_length=15, blank=True, null=True)
+    folio_id = models.BigIntegerField(unique=True, blank=True, null=True)
+    fecha_registro = models.DateField(blank=True, null=True)
 
     class Meta:
         managed = False
