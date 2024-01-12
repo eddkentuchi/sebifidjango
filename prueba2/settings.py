@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-yy!untkq*pnwdqds^mkxv6gn&3g7o=siz9zdw2tx&^^5eo$__p
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 #seleccionar los dominios desde donde va a resolver nuestra app
-ALLOWED_HOSTS = ['201.116.40.133','dev.fondeso.mx']
+ALLOWED_HOSTS = ['2XX.XXX.XX.XXX','dev.******.mx']
 
 
 # Application definition
@@ -93,10 +93,10 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME' : 'sebifi',
         'USER' : 'postgres',
-        'PASSWORD' : 'L4p1n5h1b453',
-        #'HOST' : '200.10.1.103',
-        'HOST' : '201.116.40.132',
-        'PORT' : '5432',
+        'PASSWORD' : '********',
+        #'HOST' : '2XX.XX.X.xx',
+        'HOST' : '2XX.XXX.XX.xx',
+        'PORT' : '5XX2',
     }
 }
 
